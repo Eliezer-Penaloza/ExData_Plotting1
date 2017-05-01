@@ -1,0 +1,28 @@
+library(dplyr)
+library(lubridate)
+Sys.setenv("LANGUAGE"="En")
+Sys.setlocale("LC_ALL", "English")
+
+dat <- read.table('C:/Users/usuario/Desktop/household_power_consumption.txt', header = TRUE, sep = ';', stringsAsFactors = FALSE)
+dat$Date <- as.Date(dat$Date, format = "%d/%m/%Y")
+dat2 <- subset(dat, Date == "2007-02-01" | Date == "2007-02-02")
+dat2 <- dat2 %>% mutate(DH = paste(as.character(Date), as.character(Time), sep = " ")) 
+dat2$DH <- strptime(dat2$DH, format = "%Y-%m-%d %H:%M:%S", tz = 'GMT')
+dat2$Sub_metering_1 <- as.numeric(dat2$Sub_metering_1)
+dat2$Sub_metering_2 <- as.numeric(dat2$Sub_metering_2)
+dat2$Sub_metering_3<- as.numeric(dat2$Sub_metering_3)
+dat2$Global_active_power <- as.numeric(dat2$Global_active_power)
+dat2$Voltage <- as.numeric(dat2$Voltage)
+
+png(file = "plot4.png")
+par(mfrow = c(2,2))
+with(dat2, plot(DH, Global_active_power, type = 'l', ylab = "Energy sub metering", xlab = ""))
+with(dat2,plot(DH, Voltage, type = "l", ylab = "Voltage", xlab = "datetime"))
+with(dat2, plot(DH, Sub_metering_1, type = 'l', ylab = "Energy sub metering", xlab = ""))
+lines(dat2$DH, dat2$Sub_metering_2 , type = "l", col = "red")
+lines(dat2$DH, dat2$Sub_metering_3 , type = "l", col = 'blue')
+legend(x = "topright", 
+       c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"), lwd = c(1,1,1), col = c("black","red","blue"), bty = "n" )
+
+with(dat2,plot(DH, Global_reactive_power, type = "l", ylab = "Global reactive power", xlab = "datetime"))
+dev.off()
